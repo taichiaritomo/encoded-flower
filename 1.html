@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Encoded Flower 1</title>
+<style>
+* {
+	box-sizing: border-box;
+}
+body {
+	width: 100vw;
+	height: 100vh;
+	margin: 0;
+	padding: 1em;
+}
+input {
+	width: 100%;
+	margin-bottom: 1em;
+	border: none;
+	outline: none;
+	font-size: 4em;
+	font-family: 'Times', 'Times New Roman', serif;
+}
+</style>
+</head>
+<body>
+  <div id="drawing"></div>
+	<input type="text">
+</body>
+<script src="svg.js"></script>
+<script>
+	var draw = SVG('drawing').size(500, 500);
+
+	const inputElement = document.querySelector('input');
+	inputElement.focus();
+	inputElement.addEventListener('input', () => {
+		render(inputElement.value);
+	});
+
+	function render(input) {
+		draw.clear();
+		const l = input.length;
+		let points = [];
+		let radii = "";
+		for (let i = 0; i < l; i++) {
+			const r = input.charCodeAt(i); // radius
+			radii = radii + ' ' + r.toString();
+			points.push([r * Math.cos(i/l * 2 * Math.PI), r * Math.sin(i/l * 2 * Math.PI)]);
+		}
+		console.log(radii);
+		draw.polyline(points).move(250, 250);
+	}
+</script>
+</html>

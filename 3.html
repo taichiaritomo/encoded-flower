@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Encoded Flower 2</title>
+<style>
+* {
+	box-sizing: border-box;
+}
+body {
+	width: 100vw;
+	height: 100vh;
+	margin: 0;
+	padding: 1em;
+}
+input {
+	width: 100%;
+	margin-bottom: 1em;
+	border: none;
+	outline: none;
+	font-size: 4em;
+	font-family: 'Times', 'Times New Roman', serif;
+}
+</style>
+</head>
+<body>
+  <div id="drawing"></div>
+	<input type="text">
+</body>
+<script src="../svg.js"></script>
+<script>
+var draw = SVG('drawing').size(500, 500).link('../');
+
+const inputElement = document.querySelector('input');
+inputElement.focus();
+inputElement.addEventListener('input', () => {
+	render(inputElement.value);
+});
+
+function render(input) {
+	draw.clear();
+	const l = input.length;
+	const r0 = input.charCodeAt(0),
+				r0_ = r0.toString(),
+				rPerp = 20; // hardcoded value for the magnitude of the control point vectors
+	
+	// start path string at 0 degrees
+	let pathstring = 'M '+ r0_ +' 0 S '+ r0_ +' '+ (-1*rPerp).toString() +' '+ r0_ +' 0 ';
+	
+	for (let i = 1; i < l; i++) {
+		const r 				= input.charCodeAt(i),	 // radius
+					theta			= i/l * 2*Math.PI,     // theta
+					thetaPerp = theta - Math.PI/2, 		 // theta + 90deg (direction of control point vector)
+					x 		    = r * Math.cos(theta),   // cartesian x
+					y 				= r * Math.sin(theta),   // cartesian y
+					x2				= x + rPerp*Math.cos(thetaPerp),
+					y2				= y + rPerp*Math.sin(thetaPerp);
+		pathstring += 'S ' + x2.toString() +' '+ y2.toString() +' '+ x.toString() +' '+ y.toString() +' ';
+	}
+	
+	// finish path string at 360 degrees
+	pathstring += 'S '+ r0_ +' '+ (-1*rPerp).toString() +' '+ r0_ +' 0 ';
+	pathstring += 'z'; // close path
+	console.log(pathstring);
+	draw.path(pathstring).move(250, 250);
+}
+</script>
+	
+</html>
