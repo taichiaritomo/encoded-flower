@@ -6,48 +6,78 @@ var draw = SVG('drawing').size(500, 500).link('../');
 // 	render(inputElement.value);
 // });
 
-const t = "14191771056331861450905439953328545697861381955239891833290732477079437281"; // number obtained by taking epoch time to the 6th power
+// const t = "14191771056331861450905439953328545697861381955239891833290732477079437281"; // number obtained by taking epoch time to the 6th power
 
-
-class BezCrv {
-
-	/** @param {Number} x | @param {Number} y */
-	constructor(x, y) {
-		this.x = x;
-		this.y = y;
-	}
-	
-	/** @param {Number} x1 */
-	set x1(x1) { this.x1 = x1; }
-
-	/** @param {Number} y1 */
-	set y1(y1) { this.y1 = y1; }
-
-	/** @param {Number} x2 */
-	set x2(x2) { this.x2 = x2; }
-
-	/**  @param {Number} y2 */
-	set y2(y2) { this.y2 = y2; }
-	
-	/** @return {String} An SVG cubic Bezier curve command, intended for a path string */
-	get path() {
-		let p;
-
-		if (this.x2 != null && this.y2 != null && this.x1 != null && this.y1 != null) {
-			// Curveto
-			p = ['C', this.x1, this.y1, this.x2, this.y2, this.x, this.y].join(' ');
-		} else if (this.x2 != null && this.y2 != null) {
-			// Shorthand/smooth curveto
-			p = ['S', this.x2, this.y2, this.x, this.y].join(' ');
-		} else {
-			// Lineto
-			p = ['L', this.x, this.y].join(' ');
+// Long multiplication with string representations of integers.
+// From Rosetta Code: https://rosettacode.org/wiki/Long_multiplication#JavaScript
+function mult(strNum1, strNum2) {
+	var a1 = strNum1.split("").reverse();
+	var a2 = strNum2.toString().split("").reverse();
+	var aResult = new Array;
+	for ( var iterNum1 = 0; iterNum1 < a1.length; iterNum1++ ) {
+		for ( var iterNum2 = 0; iterNum2 < a2.length; iterNum2++ ) {
+			var idxIter = iterNum1 + iterNum2; // Get the current array position.
+			aResult[idxIter] = a1[iterNum1] * a2[iterNum2] + ( idxIter >= aResult.length ? 0 : aResult[idxIter] );
+			if ( aResult[idxIter] > 9 ) { // Carrying
+				aResult[idxIter + 1] = Math.floor( aResult[idxIter] / 10 ) + ( idxIter + 1 >= aResult.length ? 0 : aResult[idxIter + 1] );
+				aResult[idxIter] %= 10;
+			}
 		}
-
-		return p;
 	}
-
+	return aResult.reverse().join("");
 }
+
+// Power function with string representation of integer
+function pow(strNum, power) {
+	let result = strNum;
+	while (--power > 0)
+		result = mult(result, strNum);
+	return result;
+}
+
+let t = pow( Date.now().toString(), 6 );
+
+
+
+//class BezCrv {
+//
+//	/** @param {Number} x | @param {Number} y */
+//	constructor(x, y) {
+//		this.x = x;
+//		this.y = y;
+//	}
+//	
+//	/** @param {Number} x1 */
+//	set x1(x1) { this.x1 = x1; }
+//
+//	/** @param {Number} y1 */
+//	set y1(y1) { this.y1 = y1; }
+//
+//	/** @param {Number} x2 */
+//	set x2(x2) { this.x2 = x2; }
+//
+//	/**  @param {Number} y2 */
+//	set y2(y2) { this.y2 = y2; }
+//	
+//	/** @return {String} An SVG cubic Bezier curve command, intended for a path string */
+//	get path() {
+//		let p;
+//
+//		if (this.x2 != null && this.y2 != null && this.x1 != null && this.y1 != null) {
+//			// Curveto
+//			p = ['C', this.x1, this.y1, this.x2, this.y2, this.x, this.y].join(' ');
+//		} else if (this.x2 != null && this.y2 != null) {
+//			// Shorthand/smooth curveto
+//			p = ['S', this.x2, this.y2, this.x, this.y].join(' ');
+//		} else {
+//			// Lineto
+//			p = ['L', this.x, this.y].join(' ');
+//		}
+//
+//		return p;
+//	}
+//
+//}
 
 
 /**
@@ -98,39 +128,17 @@ function flowerEncode(s, radix=10) {
 function render(input) {
 	draw.clear();
 	let path = flowerEncode(input);
-	draw.path(path).size(400).move(0, 0);
+	draw.path(path).move(250, 250).transform({ scale: 20 });
 }
 
-render(t);
+setInterval(() => {
+	t = pow( Date.now().toString(), 6 );
+	render(t);
+}, 1000);
 
+console.log( '-'.charCodeAt(0) );
 
-
-
-// function render(input) {
-// 	draw.clear();
-// 	const l = input.length;
-// 	const r0 = input.charCodeAt(0),
-// 				r0_ = r0.toString(),
-// 				rPerp = 20; // hardcoded value for the magnitude of the control point vectors
-	
-// 	// start path string at 0 degrees
-// 	let pathstring = 'M '+ r0_ +' 0 S '+ r0_ +' '+ (-1*rPerp).toString() +' '+ r0_ +' 0 ';
-	
-// 	for (let i = 1; i < l; i++) {
-// 		const r 				= input.charCodeAt(i),	 // radius
-// 					theta			= i/l * 2*Math.PI,     // theta
-// 					thetaPerp = theta - Math.PI/2, 		 // theta + 90deg (direction of control point vector)
-// 					x 		    = r * Math.cos(theta),   // cartesian x
-// 					y 				= r * Math.sin(theta),   // cartesian y
-// 					x2				= x + rPerp*Math.cos(thetaPerp),
-// 					y2				= y + rPerp*Math.sin(thetaPerp);
-// 		pathstring += 'S ' + x2.toString() +' '+ y2.toString() +' '+ x.toString() +' '+ y.toString() +' ';
-// 	}
-	
-// 	// finish path string at 360 degrees
-// 	pathstring += 'S '+ r0_ +' '+ (-1*rPerp).toString() +' '+ r0_ +' 0 ';
-// 	pathstring += 'z'; // close path
-// 	console.log(pathstring);
-// 	draw.path(pathstring).move(250, 250);
-// }
+function charCode( character ) {
+	return character.charCodeAt(0) ;
+}
 
